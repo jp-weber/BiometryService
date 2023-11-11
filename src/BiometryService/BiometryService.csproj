@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	<PropertyGroup>
 		<LangVersion>10.0</LangVersion>
-		<TargetFrameworks>net7.0-android;net7.0-ios;net7.0-windows10.0.19041;uap10.0.19041</TargetFrameworks>
+		<TargetFrameworks>net7.0-android;net7.0-ios; net7.0-maccatalyst;net7.0-windows10.0.19041;uap10.0.19041</TargetFrameworks>
 		<RootNamespace>BiometryService</RootNamespace>
 		<Authors>nventive</Authors>
 		<Company>nventive</Company>
