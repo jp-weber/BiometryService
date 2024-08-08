@@ -13,6 +13,7 @@
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/nventive/BiometryService</PackageProjectUrl>
 		<DefineConstants Condition="'$(TargetFramework)'=='net8.0-windows10.0.19041'">$(DefineConstants);__WINDOWS__</DefineConstants>
+		<Platforms>AnyCPU;ARM64</Platforms>
 	</PropertyGroup>
 
 	<!-- Needed for Source Link support. -->
