@@ -52,9 +52,9 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
-		<PackageReference Include="Xamarin.AndroidX.Biometric" Version="1.1.0.29" />
+		<PackageReference Include="Xamarin.AndroidX.Biometric" Version="1.1.0.30" />
 		<PackageReference Include="Xamarin.AndroidX.Collection.Jvm">
-			<Version>1.5.0.2</Version>
+			<Version>1.5.0.3</Version>
 		</PackageReference>
 	</ItemGroup>
 </Project>
