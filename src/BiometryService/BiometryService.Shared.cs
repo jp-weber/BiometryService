@@ -9,6 +9,7 @@ namespace BiometryService;
 /// </summary>
 public sealed partial class BiometryService
 {
+#if __ANDROID__ || __WINDOWS__ || __MACCATALYST__ || __IOS__
 	/// <summary>
 	/// Validates biometry capabilities and throw the right exception if they aren't valide.
 	/// </summary>
@@ -36,4 +37,5 @@ public sealed partial class BiometryService
 			_logger.LogDebug("Biometry capabilities have been successfully validated.");
 		}
 	}
+#endif
 }
