@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using System.Threading;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace BiometryService;
@@ -18,9 +18,9 @@ public sealed partial class BiometryService
 	/// <exception cref="BiometryException">.</exception>
 	private async Task ValidateBiometryCapabilities(CancellationToken ct)
 	{
-		if (_logger.IsEnabled(LogLevel.Debug))
+		if (Logger.IsEnabled(LogLevel.Debug))
 		{
-			_logger.LogDebug("Validating biometry capabilities.");
+			Logger.LogDebug("Validating biometry capabilities.");
 		}
 
 		var biometryCapabilities = await GetCapabilities(ct);
@@ -32,9 +32,9 @@ public sealed partial class BiometryService
 			throw new BiometryException(reason, message);
 		}
 
-		if (_logger.IsEnabled(LogLevel.Information))
+		if (Logger.IsEnabled(LogLevel.Information))
 		{
-			_logger.LogDebug("Biometry capabilities have been successfully validated.");
+			Logger.LogDebug("Biometry capabilities have been successfully validated.");
 		}
 	}
 #endif

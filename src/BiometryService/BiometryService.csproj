@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Uno.Sdk">
 	<PropertyGroup>
 		<LangVersion>14.0</LangVersion>
-		<TargetFrameworks>net10.0;net10.0-android;net10.0-ios; net10.0-maccatalyst;net10.0-windows10.0.19041</TargetFrameworks>
+		<TargetFrameworks>net10.0;net10.0-android;net10.0-ios; net10.0-maccatalyst</TargetFrameworks>
 		<RootNamespace>BiometryService</RootNamespace>
 		<Authors>nventive</Authors>
 		<Company>nventive</Company>
@@ -24,6 +24,7 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
+	
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
 	  <IsAotCompatible>True</IsAotCompatible>
 	</PropertyGroup>
@@ -111,14 +112,6 @@
 		<FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" RuntimeFrameworkVersion="10.0.22000.24" />
 		<FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" TargetingPackVersion="10.0.22000.24" />
 	</ItemGroup>
-
-	<Choose>
-		<When Condition="'$(TargetFramework)'=='uap10.0.19041'">
-			<ItemGroup>
-				<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.14" />
-			</ItemGroup>
-		</When>
-	</Choose>
 
 	<ItemGroup>
 		<ProjectReference Include="..\BiometryService.Abstractions\BiometryService.Abstractions.csproj" />

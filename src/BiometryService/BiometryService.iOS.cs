@@ -13,7 +13,7 @@ namespace BiometryService;
 /// <summary>
 /// Implementation of the <see cref="IBiometryService" /> for iOS.
 /// </summary>
-public sealed partial class BiometryService : IBiometryService
+public sealed partial class BiometryService : BaseBiometryService
 {
 	/// <summary>
 	/// User facing description of the kind of authentication that the application is trying to perform.
@@ -30,8 +30,6 @@ public sealed partial class BiometryService : IBiometryService
 	/// Authentication policies.
 	/// </summary>
 	private readonly LAPolicy _localAuthenticationPolicy;
-	
-	private readonly ILogger _logger;
 
 	private readonly bool _fallbackOnPasscodeAuthentication = false;
 
@@ -47,20 +45,19 @@ public sealed partial class BiometryService : IBiometryService
 		LAContext laContext = null,
 		LAPolicy localAuthenticationPolicy = LAPolicy.DeviceOwnerAuthentication,
 		ILoggerFactory loggerFactory = null
-	)
+	) : base(loggerFactory)
 	{
 		_useOperationPrompt = useOperationPrompt;
 		_laContext = laContext ?? new LAContext();
 		_localAuthenticationPolicy = localAuthenticationPolicy;
-		_logger = loggerFactory?.CreateLogger<IBiometryService>() ?? NullLogger<IBiometryService>.Instance;
 	}
 
 	/// <inheritdoc/>
-	public Task<BiometryCapabilities> GetCapabilities(CancellationToken ct)
+	public override Task<BiometryCapabilities> GetCapabilities(CancellationToken ct)
 	{
-		if (_logger.IsEnabled(LogLevel.Debug))
+		if (Logger.IsEnabled(LogLevel.Debug))
 		{
-			_logger.LogDebug("Assessing biometry capabilities.");
+			Logger.LogDebug("Assessing biometry capabilities.");
 		}
 
 		_laContext.CanEvaluatePolicy(_localAuthenticationPolicy, out var laError);
@@ -91,27 +88,27 @@ public sealed partial class BiometryService : IBiometryService
 			}
 		}
 
-		if (_logger.IsEnabled(LogLevel.Information))
+		if (Logger.IsEnabled(LogLevel.Information))
 		{
-			_logger.LogDebug("Biometry capabilities has been successfully assessed.");
+			Logger.LogDebug("Biometry capabilities has been successfully assessed.");
 		}
 
 		return Task.FromResult(new BiometryCapabilities(biometryType, biometryIsEnabled, passcodeIsSet));
 	}
 
 	/// <inheritdoc/>
-	public async Task ScanBiometry(CancellationToken ct)
+	public override async Task ScanBiometry(CancellationToken ct)
 	{
-		if (_logger.IsEnabled(LogLevel.Debug))
+		if (Logger.IsEnabled(LogLevel.Debug))
 		{
-			_logger.LogDebug("Scanning biometry.");
+			Logger.LogDebug("Scanning biometry.");
 		}
 
 		if (_laContext.BiometryType is LABiometryType.FaceId)
 		{
-			if (_logger.IsEnabled(LogLevel.Trace))
+			if (Logger.IsEnabled(LogLevel.Trace))
 			{
-				_logger.LogTrace("Checks that `Info.plist` file contains NSFaceIDUsageDescription.");
+				Logger.LogTrace("Checks that `Info.plist` file contains NSFaceIDUsageDescription.");
 			}
 
 			// Checks that Info.plist file contains NSFaceIDUsageDescription (key/value) otherwise the application will crash.
@@ -182,7 +179,7 @@ public sealed partial class BiometryService : IBiometryService
 
 				// The context was previously invalidated.
 				// You can invalidate a context by calling its Invalidate method.
-				case -10: 
+				case -10:
 					message = "The context was invalidated";
 					break;
 
@@ -194,7 +191,7 @@ public sealed partial class BiometryService : IBiometryService
 
 				// Displaying the required authentication user interface is forbidden.
 				// Only applies when LAContext.InteractionNotAllowed is set to true.
-				case -1004: 
+				case -1004:
 					message = "Displaying the required authentication user interface is forbidden.";
 					break;
 
@@ -212,100 +209,100 @@ public sealed partial class BiometryService : IBiometryService
 		}
 		else
 		{
-			if (_logger.IsEnabled(LogLevel.Information))
+			if (Logger.IsEnabled(LogLevel.Information))
 			{
-				_logger.LogDebug("Biometry has been successfully scanned.");
+				Logger.LogDebug("Biometry has been successfully scanned.");
 			}
 		}
 	}
 
 	/// <inheritdoc/>
-	public async Task Encrypt(CancellationToken ct, string keyName, string keyValue)
+	public override async Task Encrypt(CancellationToken ct, string key, string value)
 	{
 		try
 		{
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("Encrypting the key '{keyName}'.", keyName);
+				Logger.LogDebug("Encrypting the key '{key}'.", key);
 			}
 
 			await ValidateBiometryCapabilities(ct);
 
-			SetValueForKey(keyName, keyValue);
+			SetValueForKey(key, value);
 
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("The key '{keyName}' has been successfully encrypted.", keyName);
+				Logger.LogDebug("The key '{key}' has been successfully encrypted.", key);
 			}
 		}
 		catch
 		{
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("The key '{keyName}' has not been successfully encrypted.", keyName);
+				Logger.LogDebug("The key '{key}' has not been successfully encrypted.", key);
 			}
 			throw;
 		}
 	}
 
 	/// <inheritdoc/>
-	public async Task<string> Decrypt(CancellationToken ct, string keyName)
+	public override async Task<string> Decrypt(CancellationToken ct, string key)
 	{
 		try
 		{
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("Decrypting the key '{keyName}'.", keyName);
+				Logger.LogDebug("Decrypting the key '{key}'.", key);
 			}
 
 			await ValidateBiometryCapabilities(ct);
 
-			var keyValue = GetValueForKey(keyName);
+			var value = GetValueForKey(key);
 
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("The key '{keyName}' has been successfully decrypted.", keyName);
+				Logger.LogDebug("The key '{key}' has been successfully decrypted.", key);
 			}
 
-			return keyValue;
+			return value;
 		}
 		catch
 		{
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("The key '{keyName}' has not been successfully decrypted.", keyName);
+				Logger.LogDebug("The key '{key}' has not been successfully decrypted.", key);
 			}
 			throw;
 		}
 	}
 
 	/// <inheritdoc/>
-	public void Remove(string keyName)
+	public override void Remove(string key)
 	{
-		if (_logger.IsEnabled(LogLevel.Debug))
+		if (Logger.IsEnabled(LogLevel.Debug))
 		{
-			_logger.LogDebug("Removing the key '{keyName}'.", keyName);
+			Logger.LogDebug("Removing the key '{key}'.", key);
 		}
 
 		var record = new SecRecord(SecKind.GenericPassword)
 		{
-			Service = keyName.ToLowerInvariant(),
+			Service = key.ToLowerInvariant(),
 			UseOperationPrompt = _useOperationPrompt
 		};
 
 		var status = SecKeyChain.Remove(record);
 		if (status is not SecStatusCode.Success)
 		{
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("The key '{keyName}' has not been successfully removed. Status = {status}.", keyName, status);
+				Logger.LogDebug("The key '{key}' has not been successfully removed. Status = {status}.", key, status);
 			}
-			throw new BiometryException(BiometryExceptionReason.Failed, $"Something went wrong while removing the key '{keyName}'. Status = {status}.");
+			throw new BiometryException(BiometryExceptionReason.Failed, $"Something went wrong while removing the key '{key}'. Status = {status}.");
 		}
 
-		if (_logger.IsEnabled(LogLevel.Debug))
+		if (Logger.IsEnabled(LogLevel.Debug))
 		{
-			_logger.LogDebug("The key '{keyName}' has been successfully removed.", keyName);
+			Logger.LogDebug("The key '{key}' has been successfully removed.", key);
 		}
 	}
 
@@ -331,19 +328,19 @@ public sealed partial class BiometryService : IBiometryService
 	/// <remarks>
 	/// If the key already exists, it will be replaced.
 	/// </remarks>
-	/// <param name="keyName">The key name.</param>
-	/// <param name="keyValue">The key value.</param>
+	/// <param name="key">The key name.</param>
+	/// <param name="value">The key value.</param>
 	/// <exception cref="BiometryException">.</exception>
-	private void SetValueForKey(string keyName, string keyValue)
+	private void SetValueForKey(string key, string value)
 	{
-		if (_logger.IsEnabled(LogLevel.Debug))
+		if (Logger.IsEnabled(LogLevel.Debug))
 		{
-			_logger.LogDebug("Saving the key '{keyName}'.", keyName);
+			Logger.LogDebug("Saving the key '{key}'.", key);
 		}
 
 		var record = new SecRecord(SecKind.GenericPassword)
 		{
-			Service = keyName.ToLowerInvariant(),
+			Service = key.ToLowerInvariant(),
 		};
 
 		// Check for duplicate key.
@@ -356,76 +353,76 @@ public sealed partial class BiometryService : IBiometryService
 				_fallbackOnPasscodeAuthentication ? SecAccessControlCreateFlags.UserPresence : SecAccessControlCreateFlags.BiometryCurrentSet
 			);
 
-			record.Generic = NSData.FromString(keyValue);
+			record.Generic = NSData.FromString(value);
 
 			var result = SecKeyChain.Add(record);
 			if (result is not SecStatusCode.Success)
 			{
-				throw new BiometryException(BiometryExceptionReason.Failed, $"Something went wrong while saving the key '{keyName}'. Status = {result}.");
+				throw new BiometryException(BiometryExceptionReason.Failed, $"Something went wrong while saving the key '{key}'. Status = {result}.");
 			}
 
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("Successfully saved the key '{keyName}'.", keyName);
+				Logger.LogDebug("Successfully saved the key '{key}'.", key);
 			}
 		}
 		else
 		{
-			throw new BiometryException(BiometryExceptionReason.Failed, $"Something went wrong while checking for duplicate key '{keyName}'. Status = {status}.");
+			throw new BiometryException(BiometryExceptionReason.Failed, $"Something went wrong while checking for duplicate key '{key}'. Status = {status}.");
 		}
 	}
 
 	/// <summary>
 	/// Get the encrypted value for the key using biometry.
 	/// </summary>
-	/// <param name="keyName">The key name.</param>
+	/// <param name="key">The key name.</param>
 	/// <returns>Key value.</returns>
 	/// <exception cref="BiometryException">.</exception>
 	/// <exception cref="OperationCanceledException">.</exception>
-	private string GetValueForKey(string keyName)
+	private string GetValueForKey(string key)
 	{
-		if (_logger.IsEnabled(LogLevel.Debug))
+		if (Logger.IsEnabled(LogLevel.Debug))
 		{
-			_logger.LogDebug("Retrieving the key '{keyName}'.", keyName);
+			Logger.LogDebug("Retrieving the key '{key}'.", key);
 		}
 
 		var record = new SecRecord(SecKind.GenericPassword)
 		{
-			Service = keyName.ToLowerInvariant(),
+			Service = key.ToLowerInvariant(),
 			UseOperationPrompt = _useOperationPrompt
 		};
 
-		var key = SecKeyChain.QueryAsRecord(record, out var result);
+		var keyResult = SecKeyChain.QueryAsRecord(record, out var result);
 
 		if (result is SecStatusCode.Success)
 		{
-			if (_logger.IsEnabled(LogLevel.Debug))
+			if (Logger.IsEnabled(LogLevel.Debug))
 			{
-				_logger.LogDebug("Successfully retrieved value of the key '{keyName}'.", keyName);
+				Logger.LogDebug("Successfully retrieved value of the key '{key}'.", key);
 			}
-			return key.Generic.ToString();
+			return keyResult.Generic.ToString();
 		}
 
 		var reason = BiometryExceptionReason.Failed;
-		var message = $"Something went wrong while retrieving value of the key '{keyName}'.";
+		var message = $"Something went wrong while retrieving value of the key '{key}'.";
 
 		switch (result)
 		{
 			case SecStatusCode.AuthFailed:
 				reason = BiometryExceptionReason.Failed;
-				message = $"Authentication failed. Could not retrieve value of the key '{keyName}'.";
+				message = $"Authentication failed. Could not retrieve value of the key '{key}'.";
 				break;
 			case SecStatusCode.ItemNotFound:
-				message = $"Key '{keyName}' not found.";
+				message = $"Key '{key}' not found.";
 				reason = BiometryExceptionReason.KeyInvalidated;
 				break;
 			case SecStatusCode.UserCanceled:
 				throw new OperationCanceledException();
 		}
 
-		if (_logger.IsEnabled(LogLevel.Error))
+		if (Logger.IsEnabled(LogLevel.Error))
 		{
-			_logger.LogError(message);
+			Logger.LogError(message);
 		}
 		throw new BiometryException(reason, message);
 	}
