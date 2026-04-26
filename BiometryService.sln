@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11005.162 d18.0
+VisualStudioVersion = 18.0.11005.162
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{E22802DE-B587-470A-B242-86A8E362FD4F}"
 EndProject
@@ -280,5 +280,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		samples\BiometryService.SampleApp.Uno.Shared\BiometryService.SampleApp.Uno.Shared.projitems*{6279c845-92f8-4333-ab99-3d213163593c}*SharedItemsImports = 13
+		samples\BiometryService.SampleApp.Uno.Shared\BiometryService.SampleApp.Uno.Shared.projitems*{853384dc-0e01-4dc1-ba61-a06f3a0d75ed}*SharedItemsImports = 5
+		samples\BiometryService.SampleApp.Uno.Shared\BiometryService.SampleApp.Uno.Shared.projitems*{8a268367-6414-4fbb-af2f-a39822da4ee0}*SharedItemsImports = 5
+		samples\BiometryService.SampleApp.Uno.Shared\BiometryService.SampleApp.Uno.Shared.projitems*{91e2f2a0-0862-4291-b756-7a14df3f277a}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal
